@@ -1,0 +1,17 @@
+{
+  "name": "object-writing-bot",
+  "module": "src/index.ts",
+  "type": "module",
+  "devDependencies": {
+    "bun-types": "latest"
+  },
+  "peerDependencies": {
+    "typescript": "^5.0.0"
+  },
+  "dependencies": {
+    "@badrap/valita": "^0.3.0",
+    "cron": "^3.0.0",
+    "dayjs": "^1.11.10",
+    "discord.js": "^14.13.0"
+  }
+}
