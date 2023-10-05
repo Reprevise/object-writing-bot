@@ -14,6 +14,10 @@ Follow the steps, and then the bot will be setup.
 
 ## Slash Commands
 
+**/setup**
+
+> Run the setup walkthrough, will overwrite previous settings
+
 **/addword [word]**
 
 > Adds a word to the word list

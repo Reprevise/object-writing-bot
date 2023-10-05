@@ -14,7 +14,7 @@ dayjs.extend(utc);
 
 export const botClient = new BotClient({ intents: ["Guilds"] });
 
-const job = new CronJob(
+new CronJob(
   "0 12 * * *", // noon every day in UTC time
   function () {
     const now = dayjs();
