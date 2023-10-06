@@ -3,7 +3,12 @@ import { Collection, SlashCommandBuilder } from "discord.js";
 import fs from "fs";
 import path from "path";
 import { BotClient } from "./client/client";
-import { dbAddGuild, dbGetGuilds, dbRemoveGuild } from "./db/db";
+import {
+  dbAddGuild,
+  dbGetGuilds,
+  dbRemoveGuild,
+  initializeWordList,
+} from "./db/db";
 import { BotCommand } from "./types/command";
 import { BOT_TOKEN } from "./utils/env";
 import { rollWordForServer } from "./utils/roll";
@@ -12,12 +17,14 @@ import utc from "dayjs/plugin/utc";
 
 dayjs.extend(utc);
 
+await initializeWordList();
+
 export const botClient = new BotClient({ intents: ["Guilds"] });
 
 new CronJob(
   "0 12 * * *", // noon every day in UTC time
   function () {
-    const now = dayjs();
+    const now = dayjs.utc()
 
     for (const guild of dbGetGuilds()) {
       if (guild.lastManualRoll && guild.lastManualRoll.isSame(now, "day")) {

@@ -7,18 +7,7 @@ export const nullableDayjsSchema = v
   .chain((n) => {
     if (!n) return v.ok(null);
 
-    const date = dayjs(n, { utc: true });
+    const date = dayjs.utc(n);
 
     return v.ok(date);
   });
-
-// export const dateSchema = v.string().chain((str) => {
-//   const date = new Date(str);
-
-//   // If the date is invalid JS returns NaN here
-//   if (isNaN(date.getTime())) {
-//     return v.err(`Invalid date "${str}"`);
-//   }
-
-//   return v.ok(date);
-// });

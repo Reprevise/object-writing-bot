@@ -2,11 +2,15 @@ import { Channel, Client, TextChannel } from "discord.js";
 import {
   dbGetGuild,
   dbGetRandomWord,
-  dbUpdateWordLastUsed
+  dbSetManualRollTime,
+  dbUpdateWordLastUsed,
 } from "../db/db";
 import { ordinalSuffixOf } from "./number";
 
-export async function rollWordForServer(client: Client, guildId: string): Promise<string | undefined> {
+export async function rollWordForServer(
+  client: Client,
+  guildId: string
+): Promise<string | undefined> {
   const options = dbGetGuild(guildId);
 
   if (!options || !options.channelId) return;
@@ -28,6 +32,7 @@ export async function rollWordForServer(client: Client, guildId: string): Promis
 
   const { word } = dbGetRandomWord(guildId);
   dbUpdateWordLastUsed(guildId, word);
+  dbSetManualRollTime(guildId);
 
   const now = new Date();
   const month = now.toLocaleDateString("default", { month: "long" });

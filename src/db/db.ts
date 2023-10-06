@@ -1,11 +1,12 @@
 import Database from "bun:sqlite";
 import { GuildOptions, guildOptionsSchema } from "../types/guild-options";
 import { Word, wordSchema } from "../types/word";
+import dayjs from "dayjs";
 
 const db = new Database("object-writer.sqlite", { create: true });
 
 db.run<never>(`CREATE TABLE IF NOT EXISTS 'words' (
-	'word' TEXT PRIMARY KEY NOT NULL
+  'word' TEXT PRIMARY KEY NOT NULL
 );`);
 
 db.run<never>(`CREATE TABLE IF NOT EXISTS 'servers' (
@@ -14,10 +15,21 @@ db.run<never>(`CREATE TABLE IF NOT EXISTS 'servers' (
   'lastManualRoll' INTEGER
 );`);
 
+export async function initializeWordList() {
+  const wordsFile = Bun.file("./wordlist.txt");
+  const rawWords = await wordsFile.text();
+  const wordsList = rawWords
+    .trim()
+    .split("\n")
+    .map((w) => `('${w}')`);
+
+  db.run<never>(`INSERT OR IGNORE INTO 'words' VALUES ${wordsList.join(", ")}`);
+}
+
 export function dbUpdateWordLastUsed(guildId: string, word: string): void {
   db.run<[string, number]>(
     `INSERT INTO '${guildId}-words' (word, lastUsed) VALUES (?1, ?2) ON CONFLICT DO UPDATE SET 'lastUsed' = ?2 WHERE word = ?1`,
-    [word, new Date().getTime()]
+    [word, dayjs.utc().valueOf()]
   );
 }
 
@@ -118,4 +130,11 @@ export function dbGetGuild(id: string): GuildOptions | null {
   if (!response) return null;
 
   return guildOptionsSchema.parse(response);
+}
+
+const setManualRollTimeQuery = db.prepare<never, [string, number]>(
+  "UPDATE 'servers' SET lastManualRoll = ?2 WHERE id = ?1"
+);
+export function dbSetManualRollTime(guildId: string) {
+  setManualRollTimeQuery.run(guildId, dayjs.utc().valueOf());
 }
