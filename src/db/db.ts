@@ -16,7 +16,7 @@ db.run<never>(`CREATE TABLE IF NOT EXISTS 'servers' (
 
 export function dbUpdateWordLastUsed(guildId: string, word: string): void {
   db.run<[string, number]>(
-    `UPDATE '${guildId}-words' SET 'lastUsed' = ?2 WHERE word = ?1`,
+    `INSERT INTO '${guildId}-words' (word, lastUsed) VALUES (?1, ?2) ON CONFLICT DO UPDATE SET 'lastUsed' = ?2 WHERE word = ?1`,
     [word, new Date().getTime()]
   );
 }
@@ -40,8 +40,6 @@ LIMIT 1;
 `);
 
   const response = query.get();
-
-  console.log(response);
 
   return wordSchema.parse(response);
 }
@@ -112,7 +110,7 @@ export function dbAddOrUpdateWritingChannel(
 }
 
 const guildQuery = db.prepare<Record<string, unknown>, string>(
-  "SELECT id, channelId FROM 'servers' WHERE id = ? LIMIT 1;"
+  "SELECT * FROM 'servers' WHERE id = ? LIMIT 1;"
 );
 export function dbGetGuild(id: string): GuildOptions | null {
   const response = guildQuery.get(id);
